@@ -1,0 +1,84 @@
+﻿firstly,
+1. I launched four ubuntu instances in my free-tier aws account.
+    - In that 4 ubuntu instances:
+       a) we have give tag for instance 1st ubuntu instance as "Controller".
+       b) On the remaining three instance tagged as Server1, Server2, Server3.
+       c)Do the passwordless ssh on three instances.(server1,server2,server3).
+          - using this commands:
+            we have run this commands on all three server-instances.
+             - first, we have to connect our servers using git-bash.
+                 - sudo passwd ubuntu (for intializing password).
+             - than we have to change the Password authentication:"No" to "Yes".
+                 - sudo vim /etc/ssh/sshd_config
+                 - goto insertion mode by pressing i.
+                 - than search for password authentication and make it no to yes.
+                   save and quit.
+             - restart the ssh service.
+                 - service ssh restart (restarting the ssh-service)
+       d) trigger all above commands on all the servers.
+       e)Now, we have to connect with Controller.
+        here,we have trigger few commands:
+         - sudo ssh-keygen
+       f)here, we are connecting controller to servers.
+         - sudo ssh-copy-id ubuntu@ipadreess of server1(private-ip)
+         - sudo ssh-copy-id ubuntu@ipadreess of server2(private-ip)
+         - sudo ssh-copy-id ubuntu@ipadreess of server3(private-ip)
+       g) enter the password:
+         like ****
+         with above process our passwordless-ssh is done.
+  
+Now, here we need install ansible pre-required software-packages.
+     1. Update the repository.
+         sudo apt-get update
+     2. install the software-properties-common package.
+         sudo apt-get install -y software-properties-common
+     3. Again update the repository.
+         sudo apt-get update
+     4. Install the Ansible.
+         sudo apt-get install -y ansible
+     5. check the ansible version.
+         ansible --version
+
+Now, here we have to mention ip-address in inventory.
+     In Controller,we have to fire all those commands:
+      first, we have to mention Servers ip-address in inventory file.
+       35.170.187.215
+       172.31.88.135
+
+for installing docker and nginx.we need to write a playbook.
+ sudo vim playbook1.yml 
+--- 
+- name: install docker
+  hosts: all
+  tasks:
+   - name: install python-pip
+     apt:
+      name: python-pip
+      state: present
+   - name: download & install docker and docker-py
+     shell: "{{item}}"
+     with_items:
+       - curl -fsSL https://get.docker.com -o get-docker.sh
+       - sh get-docker.sh
+       - pip install docker-py
+   - name: create nginx container
+     docker_container:
+      name:
+      image: nginx
+      ports:
+        "9090:80"
+...
+
+  
+to run the playbook:
+ansible-playbook playbook1.yml -b
+
+to check the nginx conatiner is installed or not.launch the browser
+ take anyone managed server-ip address:9090
+ like  35.170.187.215:9090
+        
+
+
+
+         
+                   
